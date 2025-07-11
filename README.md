@@ -2,6 +2,10 @@
 
 A repository containing my notes and projects for signal processing. The roadmap is as follows:
 
+1. Phase 1: Mathematics and fundamentals of signal processing
+2. Phase 2: DSP in C++ with a focus on algorithms and command line usage (CLI)
+3. Phase 3: Advanced DSP in C++ with a focus on real-time implementation 
+
 ## Phase 1 : Math and Fundamentals
 
 ### **Week 1**: Signals & Systems Basics
