@@ -6,6 +6,9 @@
 #include <functional>
 #include <algorithm>
 #include <complex>
+#include <limits>
+
+double PI = acos(-1);
 
 void impulse(std::vector<double>& out,int n, double A = 1.0) {
     if (n < 0 || n > out.size()) 
@@ -95,27 +98,67 @@ std::complex<double> dft_coeff(std::vector<double>& x, const int N, int k) {
     std::complex<double> j(0.0,1.0);
     for (int n = 0; n < N; n++)
     {
-        c_k += (1.0/static_cast<double>(N))*x[n]*std::exp(-j * (2.0*PI*n*k/N) );
+        c_k += (2.0/N)*x[n]*std::exp(-j * (2.0*PI*n*k/N) );
     }
     return c_k;
 }
 
-std::vector<double> dft_freq(const int N, int T=1.0) {
+std::vector<double> dft_freq(const int N, double fs){
     std::vector<double> fft_freq(N,0.0);
-    for (int i = -N/2; i < N/2; i++)
+    for (int i = 0; i < N; i++)
     {
-        fft_freq[i] = i/(N*T);
+        fft_freq[i] = i * fs / N ;
     }
     return fft_freq;
 }
 
-std::vector<double> dft_full(std::vector<double>& x, const int N, int k, int T = 1.0) {
-    std::vector<double> freqs = dft_freq(N,T/N);
-    std::vector<double> cks;
+std::vector<std::complex<double>> dft_full(std::vector<double>& x, const int N) {
+    std::vector<std::complex<double>> cks;
+    cks.reserve(N);
     for (int k = 0; k < N; k++)
     {
-        cks.push_back((x,N,k));
+        cks.push_back(dft_coeff(x,N,k));
     }
     return cks;
 }
     
+std::vector<double> phase_spectrum(std::vector<std::complex<double>>& x, 
+                                   bool unwrap = false,
+                                   double eps = 1e-16) {
+    std::vector<double> phase(x.size());
+    
+    for (size_t i = 0; i < x.size(); i++) {
+        if (std::abs(x[i]) > eps) {
+            phase[i] = std::atan2(x[i].imag(), x[i].real());
+        } else {
+            phase[i] = std::numeric_limits<double>::quiet_NaN(); // or 0.0 if you prefer
+        }
+    }
+
+    // Step 2: unwrap if requested
+    if (unwrap && !phase.empty()) {
+        for (size_t i = 1; i < phase.size(); i++) {
+            if (std::isnan(phase[i]) || std::isnan(phase[i-1])) {
+                continue; // skip masked bins
+            }
+
+            double dp = phase[i] - phase[i-1];
+
+            // Wrap difference into [-pi, pi]
+            while (dp > PI)  dp -= 2*PI;
+            while (dp < -PI) dp += 2*PI;
+
+            phase[i] = phase[i-1] + dp;
+        }
+    }
+
+    return phase;
+}
+
+std::vector<double> magnitude_spectrum(const std::vector<std::complex<double>>& x) {
+    std::vector<double> mag(x.size());
+    for (int i = 0; i < x.size(); i++) {
+        mag[i] = std::abs(x[i]);
+    }
+    return mag;
+}
