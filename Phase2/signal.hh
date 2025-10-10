@@ -131,7 +131,7 @@ std::vector<double> phase_spectrum(std::vector<std::complex<double>>& x,
         if (std::abs(x[i]) > eps) {
             phase[i] = std::atan2(x[i].imag(), x[i].real());
         } else {
-            phase[i] = std::numeric_limits<double>::quiet_NaN(); // or 0.0 if you prefer
+            phase[i] = std::numeric_limits<double>::quiet_NaN(); // or 0.0
         }
     }
 

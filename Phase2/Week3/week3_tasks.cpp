@@ -2,6 +2,7 @@
 #include <vector>
 #include <fstream>
 #include "../signal.hh"
+#include "../Week4/timer.cpp"
 #define _USE_MATH_DEFINES
 
 int main(int argc, char const *argv[])
@@ -13,9 +14,11 @@ int main(int argc, char const *argv[])
 
     std::vector<double> mult_freq_sig = signal_generator(N, [T](int n) {return std::cos(50 * 2 * PI * n * T) + 2*std::cos(100 * 2 * PI * n * T); });
 
+    Timer t; // Timing info
     std::vector<double> dft_freq_test = dft_freq(N,fs); // freq axis for dft
     std::vector<std::complex<double>> dft_cks = dft_full(mult_freq_sig, N); // dft for input
     std::vector<double> dft_size(dft_cks.size(),0.0);
+    std::cout << "Elapsed: " << t.elapsed() << " ms\n";
 
     std::vector<double> phase = phase_spectrum(dft_cks,true,1e-8);
     std::vector<double> magnitude = magnitude_spectrum(dft_cks);
